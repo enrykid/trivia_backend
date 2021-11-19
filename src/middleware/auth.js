@@ -17,8 +17,8 @@ const verifyToken = (req, res, next) => {
         }
         return next()
     } catch (error) {
-        return res.status(401).send({ data: {error:error.toString()}, status: false, message: "Error de autenticación"})
+        return res.status(200).send({ data: { error: error.toString() }, status: false, message: "Error de autenticación" })
     }
 }
 
-module.exports=verifyToken
+module.exports = verifyToken

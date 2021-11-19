@@ -1,21 +1,13 @@
 const Question = require("../models/question")
 const Player = require("../models/players")
-function getSingleTriviaQuestions() {
-    const triviaQuestion = {
-        question: "¿Cuantos años tienes?",
-        answers: [
-            "20",
-            "30",
-            "40",
-            "50"
-        ],
-        correctAnswer: "30"
-    }
+const axios = require("axios")
 
+async function getSingleTriviaQuestions() {
+    const triviaQuestion = await getTriviaQuestionApi()
     insertQuestionIntoDataBase(triviaQuestion)
-
     return triviaQuestion
 }
+
 function insertQuestionIntoDataBase(question) {
 
     Question.create({
@@ -42,8 +34,29 @@ async function updatePlayerScore(userName, winner) {
     }
     if (winner == true) {
         player.score++
-        player.save()
+            player.save()
     }
     return player.score
+}
+
+async function getTriviaQuestionApi() {
+    const data = await axios.get("https://opentdb.com/api.php?amount=1")
+    console.log(data.data.results)
+    const respuestas = ["", "", "", ""]
+    let j = 0;
+    const position = Math.floor(Math.random() * 3);
+    respuestas[position] = data.data.results[0].correct_answer
+    for (let i = 0; i < 4; i++) {
+        if (respuestas[i] == "") {
+            respuestas[i] = data.data.results[0].incorrect_answers[j]
+            j++
+        }
+    }
+    const triviaQuestion = {
+        question: data.data.results[0].question,
+        answers: respuestas,
+        correctAnswer: data.data.results[0].correct_answer
+    }
+    return triviaQuestion
 }
 module.exports = { getSingleTriviaQuestions, verifyAnswer, updatePlayerScore }
